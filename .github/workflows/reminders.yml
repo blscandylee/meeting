@@ -15,21 +15,26 @@ jobs:
           NTFY_URL="https://ntfy.sh/kepong-tasks"
 
           SETTINGS=$(curl -fsSL "${DB_URL}/meeting_settings.json" 2>/dev/null || echo "{}")
+          [ -z "$SETTINGS" ] && SETTINGS="{}"
+          [ "$SETTINGS" = "null" ] && SETTINGS="{}"
           REMIND_BEFORE=$(echo "$SETTINGS" | jq -r '.remindBefore // 24')
           DAILY_TIME=$(echo "$SETTINGS" | jq -r '.dailyTime // 9')
           OVERDUE_FREQ=$(echo "$SETTINGS" | jq -r '.overdueFreq // 2')
 
           STATE=$(curl -fsSL "${DB_URL}/meeting_notified.json" 2>/dev/null || echo "{}")
           [ -z "$STATE" ] && STATE="{}"
+          [ "$STATE" = "null" ] && STATE="{}"
 
           TASKS_JSON=$(curl -fsSL "${DB_URL}/meeting_tasks.json" 2>/dev/null || echo "{}")
+          [ -z "$TASKS_JSON" ] && TASKS_JSON="{}"
+          [ "$TASKS_JSON" = "null" ] && TASKS_JSON="{}"
           TASK_COUNT=$(echo "$TASKS_JSON" | jq 'length' 2>/dev/null || echo '0')
           echo "Tasks: $TASK_COUNT | remindBefore=${REMIND_BEFORE}h dailyTime=$DAILY_TIME overdueFreq=${OVERDUE_FREQ}h"
 
           NOW_EPOCH=$(date +%s)
           NOW_MS=$((NOW_EPOCH * 1000))
           CURRENT_DATE=$(date -u +%Y-%m-%d)
-          LOCAL_HOUR=$(( ($(date -u +%H) + 8) % 24 ))
+          LOCAL_HOUR=$(( (10#$(date -u +%H) + 8) % 24 ))
 
           SENT=0
           NEW_STATE="$STATE"
@@ -41,17 +46,14 @@ jobs:
               DUE_DATE=$(echo "$TASK" | jq -r '.dueDate // empty')
               [ "$DONE" = "true" ] && continue
               [ -z "$DUE_DATE" ] && continue
-
               ASSIGNEE=$(echo "$TASK" | jq -r '.assignee // "?"')
               TASK_DESC=$(echo "$TASK" | jq -r '.taskDesc // "?"')
               [ ${#TASK_DESC} -gt 50 ] && TASK_DESC="${TASK_DESC:0:50}..."
-
               DUE_EPOCH=$(date -d "${DUE_DATE}:00+08:00" +%s 2>/dev/null || echo "0")
               [ "$DUE_EPOCH" = "0" ] && continue
               DUE_MS=$((DUE_EPOCH * 1000))
               DIFF_MS=$((DUE_MS - NOW_MS))
               DIFF_HOURS=$((DIFF_MS / 3600000))
-
               if [ "$DIFF_MS" -le 0 ] && [ "$OVERDUE_FREQ" != "-1" ]; then
                 KEY="${TASK_ID}_overdue"
                 LAST=$(echo "$STATE" | jq -r ".\"$KEY\" // 0")
@@ -63,7 +65,6 @@ jobs:
                   NEW_STATE=$(echo "$NEW_STATE" | jq ".\"$KEY\" = $NOW_MS")
                 fi
               fi
-
               if [ "$DIFF_MS" -gt 0 ] && [ "$DIFF_MS" -le $((REMIND_BEFORE * 3600000)) ]; then
                 KEY="${TASK_ID}_soon"
                 LAST=$(echo "$STATE" | jq -r ".\"$KEY\" // 0")
