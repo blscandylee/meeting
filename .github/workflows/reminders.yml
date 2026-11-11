@@ -1,0 +1,108 @@
+name: Task Reminders
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check and send reminders
+        run: |
+          DB_URL="https://kepong-project-default-rtdb.firebaseio.com"
+          NTFY_URL="https://ntfy.sh/kepong-tasks"
+
+          SETTINGS=$(curl -fsSL "${DB_URL}/meeting_settings.json" 2>/dev/null || echo "{}")
+          REMIND_BEFORE=$(echo "$SETTINGS" | jq -r '.remindBefore // 24')
+          DAILY_TIME=$(echo "$SETTINGS" | jq -r '.dailyTime // 9')
+          OVERDUE_FREQ=$(echo "$SETTINGS" | jq -r '.overdueFreq // 2')
+
+          STATE=$(curl -fsSL "${DB_URL}/meeting_notified.json" 2>/dev/null || echo "{}")
+          [ -z "$STATE" ] && STATE="{}"
+
+          TASKS_JSON=$(curl -fsSL "${DB_URL}/meeting_tasks.json" 2>/dev/null || echo "{}")
+          TASK_COUNT=$(echo "$TASKS_JSON" | jq 'length' 2>/dev/null || echo '0')
+          echo "Tasks: $TASK_COUNT | remindBefore=${REMIND_BEFORE}h dailyTime=$DAILY_TIME overdueFreq=${OVERDUE_FREQ}h"
+
+          NOW_EPOCH=$(date +%s)
+          NOW_MS=$((NOW_EPOCH * 1000))
+          CURRENT_DATE=$(date -u +%Y-%m-%d)
+          LOCAL_HOUR=$(( ($(date -u +%H) + 8) % 24 ))
+
+          SENT=0
+          NEW_STATE="$STATE"
+
+          if [ "$TASK_COUNT" -gt 0 ]; then
+            for TASK_ID in $(echo "$TASKS_JSON" | jq -r 'keys[]'); do
+              TASK=$(echo "$TASKS_JSON" | jq -c ".[\"$TASK_ID\"]")
+              DONE=$(echo "$TASK" | jq -r '.done // false')
+              DUE_DATE=$(echo "$TASK" | jq -r '.dueDate // empty')
+              [ "$DONE" = "true" ] && continue
+              [ -z "$DUE_DATE" ] && continue
+
+              ASSIGNEE=$(echo "$TASK" | jq -r '.assignee // "?"')
+              TASK_DESC=$(echo "$TASK" | jq -r '.taskDesc // "?"')
+              [ ${#TASK_DESC} -gt 50 ] && TASK_DESC="${TASK_DESC:0:50}..."
+
+              DUE_EPOCH=$(date -d "${DUE_DATE}:00+08:00" +%s 2>/dev/null || echo "0")
+              [ "$DUE_EPOCH" = "0" ] && continue
+              DUE_MS=$((DUE_EPOCH * 1000))
+              DIFF_MS=$((DUE_MS - NOW_MS))
+              DIFF_HOURS=$((DIFF_MS / 3600000))
+
+              if [ "$DIFF_MS" -le 0 ] && [ "$OVERDUE_FREQ" != "-1" ]; then
+                KEY="${TASK_ID}_overdue"
+                LAST=$(echo "$STATE" | jq -r ".\"$KEY\" // 0")
+                if [ $((NOW_MS - LAST)) -ge $((OVERDUE_FREQ * 3600000)) ]; then
+                  MSG="已逾期: ${ASSIGNEE} - ${TASK_DESC}"
+                  echo "OVERDUE: $MSG"
+                  curl -fsSL -H "Title: 任务已逾期!" -H "Priority: high" -H "Tags: warning" "$NTFY_URL" -d "$MSG"
+                  SENT=$((SENT+1))
+                  NEW_STATE=$(echo "$NEW_STATE" | jq ".\"$KEY\" = $NOW_MS")
+                fi
+              fi
+
+              if [ "$DIFF_MS" -gt 0 ] && [ "$DIFF_MS" -le $((REMIND_BEFORE * 3600000)) ]; then
+                KEY="${TASK_ID}_soon"
+                LAST=$(echo "$STATE" | jq -r ".\"$KEY\" // 0")
+                if [ "$LAST" = "0" ]; then
+                  if [ "$DIFF_HOURS" -le 2 ]; then
+                    MSG="紧急! ${ASSIGNEE} 的「${TASK_DESC}」将在 ${DIFF_HOURS}小时内到期!"
+                    TITLE="任务快到期了!"
+                    PRIO="urgent"
+                  else
+                    MSG="提醒: ${ASSIGNEE} 的「${TASK_DESC}」将在 ${DIFF_HOURS}小时后到期。"
+                    TITLE="任务即将到期"
+                    PRIO="default"
+                  fi
+                  echo "SOON: $MSG"
+                  curl -fsSL -H "Title: $TITLE" -H "Priority: $PRIO" -H "Tags: clock" "$NTFY_URL" -d "$MSG"
+                  SENT=$((SENT+1))
+                  NEW_STATE=$(echo "$NEW_STATE" | jq ".\"$KEY\" = $NOW_MS")
+                fi
+              fi
+            done
+          fi
+
+          if [ "$DAILY_TIME" != "-1" ] && [ "$LOCAL_HOUR" -ge "$DAILY_TIME" ]; then
+            DKEY="daily_${CURRENT_DATE}"
+            DLAST=$(echo "$STATE" | jq -r ".\"$DKEY\" // 0")
+            if [ "$DLAST" = "0" ] && [ "$TASK_COUNT" -gt 0 ]; then
+              PENDING=$(echo "$TASKS_JSON" | jq '[.[] | select(.done != true)] | length')
+              OVERDUE_N=$(echo "$TASKS_JSON" | jq "[.[] | select(.done != true and .dueDate != null and .dueDate < \"$(date -u +%Y-%m-%dT%H:%M)\")] | length")
+              DUE_TODAY=$(echo "$TASKS_JSON" | jq "[.[] | select(.done != true and .dueDate != null and (.dueDate | startswith(\"$CURRENT_DATE\")))] | length")
+              if [ "$PENDING" -gt 0 ]; then
+                MSG="今日任务 - 逾期:${OVERDUE_N} 今日到期:${DUE_TODAY} 待完成:${PENDING}"
+                echo "DAILY: $MSG"
+                curl -fsSL -H "Title: 每日任务汇总" -H "Priority: default" -H "Tags: memo" "$NTFY_URL" -d "$MSG"
+                SENT=$((SENT+1))
+              fi
+              NEW_STATE=$(echo "$NEW_STATE" | jq ".\"$DKEY\" = $NOW_MS")
+            fi
+          fi
+
+          echo "Saving state..."
+          curl -fsSL -X PUT -d "$NEW_STATE" "${DB_URL}/meeting_notified.json"
+          echo "=== Sent $SENT notification(s) ==="
