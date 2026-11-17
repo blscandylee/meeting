@@ -1,0 +1,1635 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>任务清单</title>
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="任务清单">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: #333;
+            padding: 20px 12px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #fff;
+            font-size: 28px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .header-sub {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-group.full-width {
+            flex: 1 1 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background: #d68910;
+        }
+
+        .btn-success {
+            background: #25d366;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #1da851;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-whatsapp:hover {
+            background: #1da851;
+        }
+
+        .records-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: #555;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .status-pending { background: #f39c12; }
+        .status-done { background: #2ecc71; }
+        .status-overdue { background: #e74c3c; }
+
+        .overdue {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        .due-soon {
+            color: #e67e22;
+            font-weight: 700;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .checkbox-cell {
+            text-align: center;
+        }
+
+        .toggle-done {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar select {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: #3498db;
+            color: #fff;
+            border-color: #3498db;
+        }
+
+        .whatsapp-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .type-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #777;
+            transition: all 0.2s;
+        }
+
+        .type-btn.active {
+            border-color: #3498db;
+            background: #ebf5fb;
+            color: #2980b9;
+        }
+
+        .type-btn:hover {
+            border-color: #3498db;
+        }
+
+        .student-fields.hidden {
+            display: none;
+        }
+
+        /* ===== 提醒设置弹窗 ===== */
+        .setting-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .setting-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .notify-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 2000;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            max-width: 320px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContent">
+        <h1>📋 任务清单</h1>
+        <div class="header-sub">学生任务追踪 · WhatsApp 通知 · 到期提醒</div>
+        <div class="header-bar">
+            <button type="button" class="btn" style="background:rgba(255,255,255,0.25);color:#fff;backdrop-filter:blur(4px);" id="manageContactsBtn">📇 通讯录</button>
+            <button type="button" class="btn" style="background:rgba(255,255,255,0.25);color:#fff;backdrop-filter:blur(4px);" id="settingsBtn">⚙️ 提醒设置</button>
+            <button type="button" class="btn" style="background:rgba(255,255,255,0.25);color:#fff;backdrop-filter:blur(4px);" id="notifyAllBtn">📢 通知负责人</button>
+        </div>
+
+        <div class="form-section">
+            <h2 style="margin-bottom: 15px; font-size: 18px;">添加新任务</h2>
+            <form id="taskForm">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>任务类型</label>
+                        <div class="type-toggle" id="typeToggle">
+                            <button type="button" class="type-btn active" data-type="student" onclick="setTaskType('student')">🧑‍🎓 学生任务</button>
+                            <button type="button" class="type-btn" data-type="general" onclick="setTaskType('general')">📄 一般任务</button>
+                        </div>
+                        <div style="font-size:12px;color:#999;margin-top:4px;">选「一般任务」时，学生名字/年级/处理方式不用填</div>
+                    </div>
+                </div>
+                <div class="form-row student-fields">
+                    <div class="form-group">
+                        <label for="studentName">学生名字</label>
+                        <input type="text" id="studentName" placeholder="学生姓名">
+                    </div>
+                    <div class="form-group">
+                        <label for="grade">年级</label>
+                        <select id="grade">
+                            <option value="">不适用 / 请选择</option>
+                            <option value="K1">K1</option>
+                            <option value="K2">K2</option>
+                            <option value="Y1">Y1</option>
+                            <option value="Y2">Y2</option>
+                            <option value="Y3">Y3</option>
+                            <option value="Y4">Y4</option>
+                            <option value="Y5">Y5</option>
+                            <option value="Y6">Y6</option>
+                            <option value="F1">F1</option>
+                            <option value="F2">F2</option>
+                            <option value="F3">F3</option>
+                            <option value="F4">F4</option>
+                            <option value="F5">F5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group student-only">
+                        <label for="contactMethod">处理方式</label>
+                        <select id="contactMethod">
+                            <option value="">请选择</option>
+                            <option value="CB">CB</option>
+                            <option value="沟通">沟通</option>
+                            <option value="面谈">面谈</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="department">部门</label>
+                        <select id="department">
+                            <option value="">请选择部门</option>
+                            <option value="托育">托育</option>
+                            <option value="小学">小学</option>
+                            <option value="中学">中学</option>
+                            <option value="载送">载送</option>
+                            <option value="Counter">Counter</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignee">负责人 *</label>
+                        <input type="text" id="assignee" list="assigneeList" placeholder="负责人姓名" required>
+                        <datalist id="assigneeList"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="assigneePhone">负责人电话</label>
+                        <input type="tel" id="assigneePhone" placeholder="如: 60123456789（已绑定群聊则无需填写）">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="case">Case *</label>
+                        <textarea id="case" placeholder="描述任务内容..." required></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="assignedDate">接任务时间 *</label>
+                        <input type="datetime-local" id="assignedDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate">Due Date *</label>
+                        <input type="datetime-local" id="dueDate" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary">添加任务</button>
+                    <button type="button" class="btn" style="background:#9b59b6;color:#fff;" id="manageContactsBtn">通讯录</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="records-section">
+            <h2 style="margin-bottom: 15px; font-size: 18px;">任务追踪表</h2>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜索学生、case、负责人...">
+            </div>
+
+            <div class="filter-bar">
+                <select id="filterAssignee">
+                    <option value="">全部负责人</option>
+                </select>
+                <select id="filterStatus">
+                    <option value="">全部状态</option>
+                    <option value="pending">待完成</option>
+                    <option value="done">已完成</option>
+                    <option value="overdue">已逾期</option>
+                </select>
+                <select id="filterDepartment">
+                    <option value="">全部部门</option>
+                    <option value="托育">托育</option>
+                    <option value="小学">小学</option>
+                    <option value="中学">中学</option>
+                    <option value="载送">载送</option>
+                    <option value="Counter">Counter</option>
+                </select>
+                <button class="btn" id="toggleDoneBtn" style="background:#2ecc71;color:#fff;">显示已完成</button>
+                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                    <select id="sendGroupSelect" style="padding:6px 10px;border-radius:4px;border:1px solid #ddd;font-size:13px;"></select>
+                    <button class="btn btn-success" id="sendSummaryBtn">发送总结</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell">完成</th>
+                            <th>学生名字</th>
+                            <th>年级</th>
+                            <th>部门</th>
+                            <th>处理方式</th>
+                            <th>Case</th>
+                            <th>负责人</th>
+                            <th>接任务时间</th>
+                            <th>Due Date</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody"></tbody>
+                </table>
+            </div>
+            <div id="emptyState"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <h2>编辑任务</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>任务类型</label>
+                        <div class="type-toggle" id="editTypeToggle">
+                            <button type="button" class="type-btn" data-type="student" onclick="setEditTaskType('student')">🧑‍🎓 学生任务</button>
+                            <button type="button" class="type-btn" data-type="general" onclick="setEditTaskType('general')">📄 一般任务</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row student-fields" id="editStudentFields">
+                    <div class="form-group">
+                        <label for="editStudentName">学生名字</label>
+                        <input type="text" id="editStudentName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editGrade">年级</label>
+                        <select id="editGrade">
+                            <option value="">不适用 / 请选择</option>
+                            <option value="K1">K1</option>
+                            <option value="K2">K2</option>
+                            <option value="Y1">Y1</option>
+                            <option value="Y2">Y2</option>
+                            <option value="Y3">Y3</option>
+                            <option value="Y4">Y4</option>
+                            <option value="Y5">Y5</option>
+                            <option value="Y6">Y6</option>
+                            <option value="F1">F1</option>
+                            <option value="F2">F2</option>
+                            <option value="F3">F3</option>
+                            <option value="F4">F4</option>
+                            <option value="F5">F5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group student-only">
+                        <label for="editContactMethod">处理方式</label>
+                        <select id="editContactMethod">
+                            <option value="">请选择</option>
+                            <option value="CB">CB</option>
+                            <option value="沟通">沟通</option>
+                            <option value="面谈">面谈</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartment">部门</label>
+                        <select id="editDepartment">
+                            <option value="">请选择部门</option>
+                            <option value="托育">托育</option>
+                            <option value="小学">小学</option>
+                            <option value="中学">中学</option>
+                            <option value="载送">载送</option>
+                            <option value="Counter">Counter</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAssignee">负责人 *</label>
+                        <input type="text" id="editAssignee" list="editAssigneeList" required>
+                        <datalist id="editAssigneeList"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAssigneePhone">负责人电话</label>
+                        <input type="tel" id="editAssigneePhone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="editCase">Case *</label>
+                        <textarea id="editCase" required></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAssignedDate">接任务时间 *</label>
+                        <input type="datetime-local" id="editAssignedDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDueDate">Due Date *</label>
+                        <input type="datetime-local" id="editDueDate" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" style="background:#ddd;" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal">
+            <h2>管理负责人通讯录</h2>
+            <form id="contactForm">
+                <input type="hidden" id="contactEditId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactName">姓名 *</label>
+                        <input type="text" id="contactName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactPhone">电话</label>
+                        <input type="tel" id="contactPhone" placeholder="如: 60123456789（群聊无需填写）">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="contactGroupLink">WhatsApp 群聊链接</label>
+                        <input type="text" id="contactGroupLink" placeholder="https://chat.whatsapp.com/...">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" style="background:#ddd;" onclick="closeContactModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+            <div id="contactList" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h2>⚙️ 提醒设置</h2>
+            <div class="setting-row">
+                <div class="form-group">
+                    <label>到期前提醒（小时）</label>
+                    <select id="remindBefore">
+                        <option value="1">1小时前</option>
+                        <option value="2">2小时前</option>
+                        <option value="6">6小时前</option>
+                        <option value="12">12小时前</option>
+                        <option value="24" selected>24小时前</option>
+                        <option value="48">48小时前</option>
+                        <option value="72">72小时前</option>
+                        <option value="-1">关闭</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>每天汇总提醒时间</label>
+                    <select id="dailyTime">
+                        <option value="7">早上 7:00</option>
+                        <option value="8">早上 8:00</option>
+                        <option value="9" selected>早上 9:00</option>
+                        <option value="10">早上 10:00</option>
+                        <option value="12">中午 12:00</option>
+                        <option value="14">下午 2:00</option>
+                        <option value="18">傍晚 6:00</option>
+                        <option value="20">晚上 8:00</option>
+                        <option value="-1">关闭</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="form-group full-width">
+                    <label>逾期提醒频率</label>
+                    <select id="overdueFreq">
+                        <option value="1">每1小时</option>
+                        <option value="2" selected>每2小时</option>
+                        <option value="4">每4小时</option>
+                        <option value="8">每8小时</option>
+                        <option value="-1">关闭</option>
+                    </select>
+                </div>
+            </div>
+            <div style="background:#eef6ff;border:1px solid #d0e4ff;color:#1a73e8;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:12px;">
+                💡 提醒由 GitHub 服务器每30分钟自动检查，<strong>不需要开着网页</strong>，直接推播到你手机。
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" style="background:#ddd;" onclick="closeSettings()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = 'https://kepong-project-default-rtdb.firebaseio.com';
+        const NTFY_URL = 'https://ntfy.sh/kepong-tasks';
+        let tasks = [];
+        let contacts = [];
+        let editingId = null;
+        let showCompleted = true;
+        let settings = { remindBefore: 24, dailyTime: 9, overdueFreq: 2 };
+        let currentTaskType = 'student';
+        let editTaskType = 'student';
+
+        // ---------- ntfy 推播（已全部关闭，保留函数避免报错） ----------
+        const PRIORITY_MAP = { min: 1, low: 2, 'default': 3, high: 4, urgent: 5, max: 5 };
+        function sendNtfy(title, body, priority, tags) {
+            return; // 通知已关闭
+            /*
+            const prio = PRIORITY_MAP[priority] !== undefined ? PRIORITY_MAP[priority] : 3;
+            const tagArr = Array.isArray(tags) ? tags : (tags ? [tags] : ['bell']);
+            fetch('https://ntfy.sh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: 'kepong-tasks',
+                    title: title,
+                    message: body,
+                    priority: prio,
+                    tags: tagArr
+                })
+            }).catch((e) => console.error('ntfy发送失败:', e));
+            */
+        }
+
+        // ---------- 提醒设置 ----------
+        async function loadSettings() {
+            try {
+                const res = await fetch(`${DB_URL}/tasklist_settings.json`);
+                const data = await res.json();
+                if (data) settings = { ...settings, ...data };
+            } catch (e) { console.error('加载设置失败:', e); }
+            document.getElementById('remindBefore').value = (settings.remindBefore !== undefined && settings.remindBefore !== null) ? settings.remindBefore : 24;
+            document.getElementById('dailyTime').value = settings.dailyTime !== undefined && settings.dailyTime !== null ? settings.dailyTime : 9;
+            document.getElementById('overdueFreq').value = (settings.overdueFreq !== undefined && settings.overdueFreq !== null) ? settings.overdueFreq : 2;
+            // 若下拉没有对应值（如旧数据），回退到「关闭」
+            ['remindBefore', 'dailyTime', 'overdueFreq'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el.selectedIndex < 0) el.value = '-1';
+            });
+        }
+
+        async function saveSettings() {
+            settings.remindBefore = parseInt(document.getElementById('remindBefore').value);
+            settings.dailyTime = parseInt(document.getElementById('dailyTime').value);
+            settings.overdueFreq = parseInt(document.getElementById('overdueFreq').value);
+            try {
+                await fetch(`${DB_URL}/tasklist_settings.json`, { method: 'PUT', body: JSON.stringify(settings) });
+            } catch (e) { console.error('保存设置失败:', e); }
+            closeSettings();
+            showToast('✅ 提醒设置已保存');
+        }
+
+        function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+
+        function showToast(msg) {
+            const el = document.createElement('div');
+            el.className = 'notify-toast';
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        // ---------- 任务类型 ----------
+        function setTaskType(type) {
+            currentTaskType = type;
+            document.querySelectorAll('#typeToggle .type-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.type === type);
+            });
+            const sf = document.querySelector('#taskForm .student-fields');
+            if (sf) sf.classList.toggle('hidden', type === 'general');
+            document.querySelectorAll('#taskForm .student-only').forEach(el => {
+                el.style.display = type === 'general' ? 'none' : '';
+            });
+            if (type === 'general') {
+                document.getElementById('studentName').value = '';
+                document.getElementById('grade').value = '';
+                document.getElementById('contactMethod').value = '';
+            }
+        }
+
+        function setEditTaskType(type) {
+            editTaskType = type;
+            document.querySelectorAll('#editTypeToggle .type-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.type === type);
+            });
+            const sf = document.getElementById('editStudentFields');
+            if (sf) sf.classList.toggle('hidden', type === 'general');
+            document.querySelectorAll('#editForm .student-only').forEach(el => {
+                el.style.display = type === 'general' ? 'none' : '';
+            });
+        }
+
+        async function startApp() {
+            await loadTasks();
+            await loadContacts();
+            await loadSettings();
+            renderAssigneeDatalist();
+            refresh();
+            setInterval(async () => {
+                await loadTasks();
+                await loadContacts();
+                renderAssigneeDatalist();
+                refresh();
+            }, 10000);
+        }
+
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${DB_URL}/tasks.json`);
+                const data = await res.json();
+                tasks = data ? Object.entries(data).map(([id, t]) => ({ id, ...t })) : [];
+            } catch (e) {
+                console.error('加载任务失败:', e);
+                tasks = [];
+            }
+        }
+
+        async function saveTaskOne(id) {
+            const t = tasks.find(x => x.id === id);
+            if (!t) return;
+            try {
+                await fetch(`${DB_URL}/tasks/${id}.json`, { method: 'PUT', body: JSON.stringify(t) });
+            } catch (e) { console.error('保存任务失败:', e); }
+        }
+
+        async function deleteTaskOne(id) {
+            try {
+                await fetch(`${DB_URL}/tasks/${id}.json`, { method: 'DELETE' });
+            } catch (e) { console.error('删除任务失败:', e); }
+        }
+
+        // 兼容旧调用
+        async function saveTasks() {
+            const obj = {};
+            tasks.forEach(t => { obj[t.id] = t; });
+            try {
+                await fetch(`${DB_URL}/tasks.json`, { method: 'PUT', body: JSON.stringify(obj) });
+            } catch (e) {
+                console.error('保存任务失败:', e);
+            }
+        }
+
+        async function loadContacts() {
+            try {
+                const res = await fetch(`${DB_URL}/contacts.json`);
+                const data = await res.json();
+                contacts = data ? Object.entries(data).map(([id, c]) => ({ id, ...c })) : [];
+            } catch (e) {
+                console.error('加载通讯录失败:', e);
+                contacts = [];
+            }
+            if (contacts.length === 0) {
+                contacts = [
+                    { id: generateId(), name: 'kepong 托育简报', phone: '', groupLink: 'https://chat.whatsapp.com/GyKdYLNXkty5qKy6LyPlF0' }
+                ];
+                await saveContacts();
+            }
+        }
+
+        async function saveContacts() {
+            const obj = {};
+            contacts.forEach(c => { obj[c.id] = c; });
+            try {
+                await fetch(`${DB_URL}/contacts.json`, { method: 'PUT', body: JSON.stringify(obj) });
+            } catch (e) {
+                console.error('保存通讯录失败:', e);
+            }
+        }
+
+        function renderAssigneeDatalist() {
+            const list = document.getElementById('assigneeList');
+            const editList = document.getElementById('editAssigneeList');
+            const options = contacts.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.phone)}</option>`).join('');
+            if (list) list.innerHTML = options;
+            if (editList) editList.innerHTML = options;
+        }
+
+        function autoFillPhone(name, targetId) {
+            const contact = contacts.find(c => c.name === name);
+            if (contact) {
+                document.getElementById(targetId).value = contact.phone;
+            }
+        }
+
+        function renderContactList() {
+            const container = document.getElementById('contactList');
+            if (contacts.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:20px;">暂无联系人</div>';
+                return;
+            }
+            container.innerHTML = contacts.map(c => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #eee;">
+                    <span>
+                        <strong>${escapeHtml(c.name)}</strong> - ${escapeHtml(c.phone)}
+                        ${c.groupLink ? '<span style="color:#25d366;font-size:11px;margin-left:6px;">[群聊已绑定]</span>' : ''}
+                    </span>
+                    <span>
+                        <button class="btn btn-warning btn-small" onclick="editContact('${c.id}')">编辑</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteContact('${c.id}')">删除</button>
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function openContactModal(contact = null) {
+            document.getElementById('contactEditId').value = contact ? contact.id : '';
+            document.getElementById('contactName').value = contact ? contact.name : '';
+            document.getElementById('contactPhone').value = contact ? contact.phone : '';
+            document.getElementById('contactGroupLink').value = contact ? (contact.groupLink || '') : '';
+            document.getElementById('contactModal').classList.add('active');
+            renderContactList();
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('active');
+        }
+
+        function editContact(id) {
+            const contact = contacts.find(c => c.id === id);
+            if (contact) openContactModal(contact);
+        }
+
+        async function deleteContact(id) {
+            if (!confirm('确定要删除这个联系人吗？')) return;
+            contacts = contacts.filter(c => c.id !== id);
+            await saveContacts();
+            renderAssigneeDatalist();
+            renderContactList();
+        }
+
+        async function saveContact(e) {
+            e.preventDefault();
+            const id = document.getElementById('contactEditId').value;
+            const name = document.getElementById('contactName').value.trim();
+            const phone = document.getElementById('contactPhone').value.trim();
+            const groupLink = document.getElementById('contactGroupLink').value.trim();
+            if (!name) return;
+            if (!phone && !groupLink) {
+                alert('请填写电话或群聊链接');
+                return;
+            }
+
+            if (id) {
+                const contact = contacts.find(c => c.id === id);
+                if (contact) {
+                    contact.name = name;
+                    contact.phone = phone;
+                    contact.groupLink = groupLink;
+                }
+            } else {
+                const existing = contacts.find(c => c.name === name);
+                if (existing) {
+                    existing.phone = phone;
+                    existing.groupLink = groupLink;
+                } else {
+                    contacts.push({ id: generateId(), name, phone, groupLink });
+                }
+            }
+            await saveContacts();
+            renderAssigneeDatalist();
+            renderContactList();
+            if (!id) {
+                document.getElementById('contactForm').reset();
+            } else {
+                closeContactModal();
+            }
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        function isOverdue(task) {
+            if (task.done || !task.dueDate) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return new Date(task.dueDate) < today;
+        }
+
+        function isDueSoon(task) {
+            if (task.done || !task.dueDate) return false;
+            const now = new Date();
+            const due = new Date(task.dueDate);
+            const diff = due - now;
+            return diff > 0 && diff <= 86400000;
+        }
+
+        function getTaskStatus(task) {
+            if (task.done) return 'done';
+            if (isOverdue(task)) return 'overdue';
+            return 'pending';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getWhatsAppLink(task) {
+            if (task.assigneePhone) {
+                let cleanPhone = task.assigneePhone.replace(/[\s\-\(\)\+]/g, '');
+                if (cleanPhone.startsWith('00')) {
+                    cleanPhone = cleanPhone.substring(2);
+                }
+                if (/^\d{8,9}$/.test(cleanPhone)) {
+                    cleanPhone = '60' + cleanPhone;
+                }
+                return `https://wa.me/${cleanPhone}`;
+            }
+            const contact = contacts.find(c => c.name === task.assignee);
+            if (contact && contact.groupLink) {
+                return contact.groupLink;
+            }
+            const groupContact = contacts.find(c => c.groupLink);
+            if (groupContact && groupContact.groupLink) {
+                return groupContact.groupLink;
+            }
+            return '';
+        }
+
+        function renderStats() {
+            const total = tasks.length;
+            const pending = tasks.filter(t => getTaskStatus(t) === 'pending').length;
+            const done = tasks.filter(t => t.done).length;
+            const overdue = tasks.filter(t => isOverdue(t)).length;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card" style="background:#ebf5fb;">
+                    <div class="stat-number" style="color:#3498db;">${total}</div>
+                    <div class="stat-label">全部任务</div>
+                </div>
+                <div class="stat-card" style="background:#fef9e7;">
+                    <div class="stat-number" style="color:#f39c12;">${pending}</div>
+                    <div class="stat-label">待完成</div>
+                </div>
+                <div class="stat-card" style="background:#fadbd8;">
+                    <div class="stat-number" style="color:#e74c3c;">${overdue}</div>
+                    <div class="stat-label">已逾期</div>
+                </div>
+                <div class="stat-card" style="background:#eafaf1;">
+                    <div class="stat-number" style="color:#2ecc71;">${done}</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+            `;
+        }
+
+        function renderAssigneeFilter() {
+            const select = document.getElementById('filterAssignee');
+            const currentVal = select.value;
+            const assignees = [...new Set(tasks.map(t => t.assignee).filter(Boolean))];
+            select.innerHTML = '<option value="">全部负责人</option>' +
+                assignees.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+            select.value = currentVal;
+        }
+
+        function renderTasks() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const filterAssignee = document.getElementById('filterAssignee').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterDepartment = document.getElementById('filterDepartment').value;
+
+            let filtered = tasks.slice().sort((a, b) => {
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(t =>
+                    (t.studentName || '').toLowerCase().includes(term) ||
+                    (t.case || '').toLowerCase().includes(term) ||
+                    (t.assignee || '').toLowerCase().includes(term) ||
+                    (t.grade || '').toLowerCase().includes(term)
+                );
+            }
+
+            if (filterAssignee) {
+                filtered = filtered.filter(t => t.assignee === filterAssignee);
+            }
+
+            if (filterStatus) {
+                filtered = filtered.filter(t => getTaskStatus(t) === filterStatus);
+            }
+
+            if (filterDepartment) {
+                filtered = filtered.filter(t => t.department === filterDepartment);
+            }
+
+            if (!showCompleted) {
+                filtered = filtered.filter(t => !t.done);
+            }
+
+            const tbody = document.getElementById('taskTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.innerHTML = '<div class="empty-state">暂无任务记录</div>';
+                document.getElementById('taskTable').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('taskTable').style.display = 'table';
+            emptyState.innerHTML = '';
+
+            tbody.innerHTML = filtered.map(t => {
+                const status = getTaskStatus(t);
+                const statusLabel = status === 'done' ? '已完成' : status === 'overdue' ? '已逾期' : '待完成';
+                const statusClass = status === 'done' ? 'status-done' : status === 'overdue' ? 'status-overdue' : 'status-pending';
+                const dateClass = isOverdue(t) ? 'overdue' : isDueSoon(t) ? 'due-soon' : '';
+                const waLink = getWhatsAppLink(t);
+                const isGen = t.taskType === 'general';
+                const who = isGen ? '' : `关于 ${t.studentName}（${t.grade || '—'}）的任务`;
+                const waMsg = `@${t.assignee} ${who ? who + '：' : '任务提醒：'}\n\n部门: ${t.department || '无'}${(!isGen && t.contactMethod) ? '\n处理方式: ' + t.contactMethod : ''}\n\n${t.case}\n\n接任务时间: ${formatDate(t.assignedDate)}\nDue Date: ${formatDate(t.dueDate)}`;
+
+                return `
+                    <tr style="${t.done ? 'opacity:0.6;' : ''}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="toggle-done" ${t.done ? 'checked' : ''} onchange="toggleDone('${t.id}')">
+                        </td>
+                        <td>${isGen ? '<span style="color:#8e44ad;font-weight:600;">📄 ' + escapeHtml(t.studentName || '一般任务') + '</span>' : escapeHtml(t.studentName)}</td>
+                        <td>${escapeHtml(t.grade || '—')}</td>
+                        <td>${escapeHtml(t.department || '')}</td>
+                        <td>${escapeHtml(t.contactMethod || '')}</td>
+                        <td style="max-width:250px;">${escapeHtml(t.case)}</td>
+                        <td>${escapeHtml(t.assignee)}</td>
+                        <td>${formatDate(t.assignedDate)}</td>
+                        <td class="${dateClass}">${formatDate(t.dueDate)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                        <td>
+                            <div class="row-actions">
+                                ${waLink ? `<a href="${waLink}" target="_blank" class="btn-whatsapp" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(waMsg)}')).then(() => alert('已复制消息，请在 WhatsApp 群里粘贴发送'))">💬 WhatsApp</a>` : ''}
+                                <button class="btn btn-small" style="background:#e67e22;color:#fff;" onclick="sendReminderToGroup('${t.id}')">提醒</button>
+                                <button class="btn btn-success btn-small" onclick="openAssign('${t.id}')">派发</button>
+                                <button class="btn btn-warning btn-small" onclick="openEdit('${t.id}')">编辑</button>
+                                <button class="btn btn-danger btn-small" onclick="deleteTask('${t.id}')">删除</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function addTask(e) {
+            e.preventDefault();
+            const studentName = document.getElementById('studentName').value.trim();
+            const grade = document.getElementById('grade').value;
+            const contactMethod = document.getElementById('contactMethod').value;
+            const department = document.getElementById('department').value;
+            const caseText = document.getElementById('case').value.trim();
+            const assignee = document.getElementById('assignee').value.trim();
+            const assigneePhone = document.getElementById('assigneePhone').value.trim();
+            const assignedDate = document.getElementById('assignedDate').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const isGeneral = currentTaskType === 'general';
+
+            if (!caseText || !assignee || !assignedDate || !dueDate) {
+                showToast('⚠️ 请填写 Case、负责人、接任务时间和 Due Date');
+                return;
+            }
+            if (!isGeneral && !studentName) {
+                showToast('⚠️ 学生任务需要填写学生名字');
+                return;
+            }
+
+            const task = {
+                id: generateId(),
+                taskType: isGeneral ? 'general' : 'student',
+                studentName: isGeneral ? (studentName || '一般任务') : studentName,
+                grade: isGeneral ? '' : grade,
+                contactMethod: isGeneral ? '' : contactMethod,
+                department,
+                case: caseText,
+                assignee,
+                assigneePhone,
+                assignedDate,
+                dueDate,
+                done: false,
+                createdAt: new Date().toISOString()
+            };
+
+            tasks.push(task);
+            await saveTaskOne(task.id);
+            refresh();
+            e.target.reset();
+            setTaskType('student');
+
+            // 新任务推播通知
+            const who = assignee ? `→ ${assignee}` : '';
+            sendNtfy('📋 新任务', `${who}\n${isGeneral ? '' : (studentName + (grade ? `(${grade})` : '') + '\n')}${caseText}\nDue: ${formatDate(dueDate)}`, 'default', 'clipboard');
+            showToast('✅ 任务已添加');
+        }
+
+        async function toggleDone(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.done = !task.done;
+                if (task.done) {
+                    task.completedAt = new Date().toISOString();
+                    // 完成推播通知
+                    const label = task.taskType === 'general' ? '' : `${task.studentName}（${task.grade || '—'}）`;
+                    sendNtfy('✅ 任务已完成', `${task.assignee} 完成了：\n${label}${label ? '\n' : ''}${task.case}`, 'default', 'white_check_mark');
+                } else {
+                    delete task.completedAt;
+                }
+                await saveTaskOne(task.id);
+                refresh();
+            }
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('确定要删除这个任务吗？')) return;
+            tasks = tasks.filter(t => t.id !== id);
+            await deleteTaskOne(id);
+            refresh();
+        }
+
+        function openEdit(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            editingId = id;
+            document.getElementById('editId').value = task.id;
+            document.getElementById('editStudentName').value = task.studentName;
+            document.getElementById('editGrade').value = task.grade;
+            document.getElementById('editContactMethod').value = task.contactMethod || '';
+            document.getElementById('editDepartment').value = task.department || '';
+            document.getElementById('editCase').value = task.case;
+            document.getElementById('editAssignee').value = task.assignee;
+            document.getElementById('editAssigneePhone').value = task.assigneePhone || '';
+            document.getElementById('editAssignedDate').value = task.assignedDate || '';
+            document.getElementById('editDueDate').value = task.dueDate;
+            setEditTaskType(task.taskType === 'general' ? 'general' : 'student');
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+            editingId = null;
+        }
+
+        async function saveEdit(e) {
+            e.preventDefault();
+            const task = tasks.find(t => t.id === editingId);
+            if (!task) return;
+            const isGeneral = editTaskType === 'general';
+            task.taskType = isGeneral ? 'general' : 'student';
+            task.studentName = isGeneral ? (document.getElementById('editStudentName').value.trim() || '一般任务') : document.getElementById('editStudentName').value.trim();
+            task.grade = isGeneral ? '' : document.getElementById('editGrade').value;
+            task.contactMethod = isGeneral ? '' : document.getElementById('editContactMethod').value;
+            task.department = document.getElementById('editDepartment').value;
+            task.case = document.getElementById('editCase').value.trim();
+            task.assignee = document.getElementById('editAssignee').value.trim();
+            task.assigneePhone = document.getElementById('editAssigneePhone').value.trim();
+            task.assignedDate = document.getElementById('editAssignedDate').value;
+            task.dueDate = document.getElementById('editDueDate').value;
+            if (!task.case || !task.assignee || !task.dueDate) {
+                showToast('⚠️ Case、负责人、Due Date 不能为空');
+                return;
+            }
+            await saveTaskOne(task.id);
+            refresh();
+            closeModal();
+            showToast('✅ 已保存');
+        }
+
+        async function openAssign(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            const newAssignee = prompt(`重新派发任务给（当前负责人: ${task.assignee}）：`, task.assignee);
+            if (!newAssignee || newAssignee.trim() === '' || newAssignee === task.assignee) return;
+            const newPhone = prompt('新负责人电话（如: 85291234567）：', task.assigneePhone || '');
+            const newDate = prompt('接任务时间（YYYY-MM-DD）：', new Date().toISOString().split('T')[0]);
+            if (!newDate) return;
+            task.assignee = newAssignee.trim();
+            task.assigneePhone = newPhone ? newPhone.trim() : '';
+            task.assignedDate = newDate;
+            task.done = false;
+            await saveTaskOne(task.id);
+            refresh();
+            sendNtfy('📤 任务已重新派发', `→ ${task.assignee}\n${task.case}\nDue: ${formatDate(task.dueDate)}`, 'default', 'outbox_tray');
+            showToast(`✅ 已派发给 ${task.assignee}`);
+        }
+
+        function refresh() {
+            renderStats();
+            renderAssigneeFilter();
+            renderGroupSelect();
+            renderTasks();
+        }
+
+        function renderGroupSelect() {
+            const select = document.getElementById('sendGroupSelect');
+            const currentVal = select.value;
+            const groups = contacts.filter(c => c.groupLink);
+            if (groups.length === 0) {
+                select.innerHTML = '<option value="">暂无群聊</option>';
+                return;
+            }
+            select.innerHTML = '<option value="">选择群聊...</option>' +
+                groups.map(c => `<option value="${escapeHtml(c.groupLink)}">${escapeHtml(c.name)}</option>`).join('');
+            select.value = currentVal;
+        }
+
+        function sendSummaryToGroup() {
+            const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            if (pending.length === 0) {
+                alert('没有待完成的任务');
+                return;
+            }
+
+            let msg = '📋 任务总结\n';
+            msg += '━━━━━━━━━━━━━━━\n';
+            msg += `📅 日期: ${new Date().toLocaleDateString('zh-CN')}\n`;
+            msg += `📊 待完成: ${pending.length} 项\n`;
+            msg += '━━━━━━━━━━━━━━━\n\n';
+
+            pending.forEach((t, i) => {
+                const status = isOverdue(t) ? '🔴 已逾期' : '🟡 待完成';
+                const label = t.taskType === 'general' ? '' : `   学生: ${t.studentName} (${t.grade || '—'})\n`;
+                msg += `${i + 1}. ${status} @${t.assignee}\n`;
+                msg += label;
+                msg += `   Case: ${t.case}\n`;
+                msg += `   负责人: ${t.assignee}\n`;
+                msg += `   部门: ${t.department || '无'}\n`;
+                if (t.taskType !== 'general') msg += `   处理方式: ${t.contactMethod || '无'}\n`;
+                msg += `   接任务时间: ${formatDate(t.assignedDate)}\n`;
+                msg += `   Due: ${formatDate(t.dueDate)}\n\n`;
+            });
+
+            msg += '━━━━━━━━━━━━━━━\n';
+
+            const selectedGroup = document.getElementById('sendGroupSelect').value;
+            navigator.clipboard.writeText(msg).then(() => {
+                if (selectedGroup) {
+                    alert('总结已复制到剪贴板！\n请在 WhatsApp 群里按 Ctrl+V 粘贴发送。');
+                    window.open(selectedGroup, '_blank');
+                } else {
+                    alert('总结已复制到剪贴板！\n\n请先选择要发送的群聊，然后在群里按 Ctrl+V 粘贴发送。');
+                }
+            });
+        }
+
+        // 一键通知所有负责人（逐个打开 WhatsApp 私聊）
+        function notifyAllAssignees() {
+            const pending = tasks.filter(t => !t.done);
+            if (pending.length === 0) {
+                showToast('没有待完成的任务');
+                return;
+            }
+            // 按负责人分组
+            const groups = {};
+            pending.forEach(t => {
+                const key = t.assignee || '未指定';
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(t);
+            });
+
+            const names = Object.keys(groups);
+            const withPhone = names.filter(n => {
+                const c = contacts.find(c => c.name === n);
+                const t = groups[n][0];
+                return (t.assigneePhone || (c && c.phone));
+            });
+
+            if (withPhone.length === 0) {
+                alert('这些负责人都没有绑定电话号码。\n请到「📇 通讯录」里补上电话。');
+                return;
+            }
+
+            const msg = `将给 ${withPhone.length} 位负责人发送各自的任务（每个间隔2秒自动打开）。\n\n` +
+                withPhone.map(n => `• ${n}（${groups[n].length} 项）`).join('\n') +
+                (names.length > withPhone.length ? `\n\n⚠️ 没电话的跳过: ${names.filter(n => !withPhone.includes(n)).join(', ')}` : '') +
+                '\n\n注意：浏览器可能会问你「是否允许打开多个窗口」，请点允许。';
+
+            if (!confirm(msg)) return;
+
+            withPhone.forEach((name, i) => {
+                setTimeout(() => {
+                    const list = groups[name];
+                    const c = contacts.find(c => c.name === name);
+                    const phone = (list[0].assigneePhone || (c ? c.phone : '')).replace(/[\s\-\(\)\+]/g, '');
+                    let clean = phone;
+                    if (clean.startsWith('00')) clean = clean.substring(2);
+                    if (/^\d{8,9}$/.test(clean)) clean = '60' + clean;
+
+                    let text = `📋 你有 ${list.length} 项待完成任务：\n━━━━━━━━━━━━━━\n`;
+                    list.forEach((t, idx) => {
+                        const label = t.taskType === 'general' ? '' : `${t.studentName}（${t.grade || '—'}）\n`;
+                        text += `${idx + 1}. ${isOverdue(t) ? '🔴已逾期' : '🟡待完成'}\n`;
+                        if (label) text += `   ${label}`;
+                        text += `   ${t.case}\n   Due: ${formatDate(t.dueDate)}\n\n`;
+                    });
+                    text += '请尽快处理，谢谢！';
+
+                    if (clean) {
+                        window.open(`https://wa.me/${clean}?text=${encodeURIComponent(text)}`, '_blank');
+                    }
+                }, i * 2000);
+            });
+
+            showToast(`📢 正在打开 ${withPhone.length} 位负责人的 WhatsApp...`);
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', addTask);
+        document.getElementById('editForm').addEventListener('submit', saveEdit);
+        document.getElementById('contactForm').addEventListener('submit', saveContact);
+        document.getElementById('searchInput').addEventListener('input', renderTasks);
+        document.getElementById('filterAssignee').addEventListener('change', renderTasks);
+        document.getElementById('filterStatus').addEventListener('change', renderTasks);
+        document.getElementById('filterDepartment').addEventListener('change', renderTasks);
+        document.getElementById('assignee').addEventListener('change', (e) => {
+            autoFillPhone(e.target.value, 'assigneePhone');
+        });
+        document.getElementById('editAssignee').addEventListener('change', (e) => {
+            autoFillPhone(e.target.value, 'editAssigneePhone');
+        });
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeContactModal();
+        });
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSettings();
+        });
+
+        document.getElementById('manageContactsBtn').addEventListener('click', () => openContactModal());
+        document.getElementById('settingsBtn').addEventListener('click', openSettings);
+        document.getElementById('notifyAllBtn').addEventListener('click', notifyAllAssignees);
+        document.getElementById('sendSummaryBtn').addEventListener('click', sendSummaryToGroup);
+        document.getElementById('toggleDoneBtn').addEventListener('click', function() {
+            showCompleted = !showCompleted;
+            this.textContent = showCompleted ? '隐藏已完成' : '显示已完成';
+            this.style.background = showCompleted ? '#2ecc71' : '#95a5a6';
+            renderTasks();
+        });
+
+        // 到期提醒系统（网页开着时的即时提醒；服务器定时提醒由 GitHub Actions 负责）
+        let notifiedDue = {};
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function checkDueReminders() {
+            const now = new Date();
+            const remindBeforeMs = (settings.remindBefore || 24) * 3600000;
+            const overdueFreqMs = (settings.overdueFreq || 2) * 3600000;
+
+            tasks.forEach(t => {
+                if (t.done || !t.dueDate) return;
+                const due = new Date(t.dueDate);
+                const diff = due - now;
+                const key = t.id + '_' + (t.dueDate || '');
+                const label = t.taskType === 'general' ? t.case : `${t.studentName}（${t.grade || '—'}）: ${t.case}`;
+
+                // 已逾期
+                if (diff <= 0 && overdueFreqMs > 0) {
+                    const last = notifiedDue[key + '_overdue'];
+                    if (!last || now - last > overdueFreqMs) {
+                        notifiedDue[key + '_overdue'] = now;
+                        sendNtfy('⏰ 任务已逾期', `${label}\n负责人: ${t.assignee}\nDue: ${formatDate(t.dueDate)}`, 'high', 'warning');
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('任务已逾期', { body: label });
+                        }
+                    }
+                }
+                // 到期前
+                else if (diff > 0 && diff <= remindBeforeMs) {
+                    const last = notifiedDue[key + '_soon'];
+                    if (!last) {
+                        notifiedDue[key + '_soon'] = now;
+                        const hrs = Math.max(1, Math.round(diff / 3600000));
+                        sendNtfy('⏳ 任务即将到期', `${label}\n还有 ${hrs} 小时到期\n负责人: ${t.assignee}`, 'default', 'clock');
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('任务即将到期', { body: label });
+                        }
+                    }
+                }
+            });
+
+            checkDailySummary(now);
+        }
+
+        let lastDailySummary = '';
+        function checkDailySummary(now) {
+            const dailyTime = settings.dailyTime !== undefined ? settings.dailyTime : 9;
+            if (dailyTime < 0) return;
+            const today = now.toDateString();
+            const hour = now.getHours();
+            if (hour >= dailyTime && lastDailySummary !== today) {
+                const pending = tasks.filter(t => !t.done && t.dueDate);
+                const overdue = pending.filter(t => new Date(t.dueDate) < now);
+                const dueToday = pending.filter(t => new Date(t.dueDate).toDateString() === today);
+                if (pending.length > 0) {
+                    lastDailySummary = today;
+                    let text = `逾期 ${overdue.length} 项 · 今日到期 ${dueToday.length} 项 · 待完成 ${pending.length} 项\n`;
+                    text += pending.slice(0, 10).map(t => `• ${t.assignee}: ${(t.taskType === 'general' ? '' : t.studentName + ' - ') + t.case}`).join('\n');
+                    sendNtfy('📋 每日任务汇总', text, 'default', 'memo');
+                } else {
+                    lastDailySummary = today;
+                }
+            }
+        }
+
+        function sendReminderToGroup(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            const contact = contacts.find(c => c.name === task.assignee) || contacts.find(c => c.groupLink);
+            const isGen = task.taskType === 'general';
+            const stuLine = isGen ? '' : `学生: ${task.studentName}（${task.grade || '—'}）\n`;
+            const msg = `⏰ 任务提醒\n@${task.assignee}\n\n${stuLine}${stuLine ? '\n' : ''}Case: ${task.case}\n负责人: ${task.assignee}\nDue Date: ${formatDate(task.dueDate)}\n\n请尽快完成！`;
+            navigator.clipboard.writeText(msg).then(() => {
+                showToast('📋 提醒已复制，正在打开 WhatsApp...');
+                // 优先私聊负责人
+                const phone = (task.assigneePhone || (contact && contact.phone) || '').replace(/[\s\-\(\)\+]/g, '');
+                let clean = phone;
+                if (clean.startsWith('00')) clean = clean.substring(2);
+                if (/^\d{8,9}$/.test(clean)) clean = '60' + clean;
+                if (clean) {
+                    window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`, '_blank');
+                } else if (contact && contact.groupLink) {
+                    window.open(contact.groupLink, '_blank');
+                } else {
+                    alert('提醒已复制到剪贴板！\n（该负责人没有电话，请在 WhatsApp 里粘贴发送）');
+                }
+            });
+        }
+
+        // 注册 Service Worker（PWA 离线支持）
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        requestNotificationPermission();
+        setInterval(checkDueReminders, 60000);
+        startApp();
+    </script>
+</body>
+</html>
